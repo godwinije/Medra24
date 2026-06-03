@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "rootDir": "./src",
+    "baseUrl": "./",
+    "paths": {
+      "@omnihealth/fhir-types": ["../../team/shared/packages/fhir-types/src/index"],
+      "@omnihealth/id-gen": ["../../team/shared/packages/id-gen/src/index"]
+    },
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "types": ["node", "jest"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "**/*.test.ts"]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "fhir-api-service",
+  "version": "1.0.0",
+  "description": "OmniHealth FHIR R4 RESTful API Service - Core clinical data API with CRUD + search",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "node --watch dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'No tests yet'"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.0",
+    "@types/uuid": "^9.0.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
