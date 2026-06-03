@@ -1,0 +1,10 @@
+# Istio Helm Chart Values Stub
+profile: default
+meshConfig:
+  accessLogFile: /dev/stdout
+  enableTracing: true
+  defaultConfig:
+    tracing:
+      sampling: 100
+      zipkin:
+        address: jaeger-collector.istio-system:9411

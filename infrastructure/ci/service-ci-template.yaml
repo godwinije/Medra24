@@ -1,0 +1,62 @@
+name: Service CI
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        required: true
+        type: string
+      working_directory:
+        required: false
+        type: string
+        default: '.'
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: "${{ inputs.working_directory }}/package-lock.json"
+      
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ inputs.working_directory }}
+
+      - name: Lint
+        run: npm run lint
+        working-directory: ${{ inputs.working_directory }}
+
+      - name: Test
+        run: npm test
+        working-directory: ${{ inputs.working_directory }}
+
+  build-scan-push:
+    needs: lint-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Build image
+        run: docker build -t omnihealth/${{ inputs.service_name }}:${{ github.sha }} ${{ inputs.working_directory }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'omnihealth/${{ inputs.service_name }}:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Push to Harbor
+        run: |
+          echo "Pushing to harbor.omnihealth.svc..."
+          # docker login harbor.omnihealth.svc -u ${{ secrets.HARBOR_USER }} -p ${{ secrets.HARBOR_PASSWORD }}
+          # docker tag omnihealth/${{ inputs.service_name }}:${{ github.sha }} harbor.omnihealth.svc/omnihealth/${{ inputs.service_name }}:${{ github.sha }}
+          # docker push harbor.omnihealth.svc/omnihealth/${{ inputs.service_name }}:${{ github.sha }}
