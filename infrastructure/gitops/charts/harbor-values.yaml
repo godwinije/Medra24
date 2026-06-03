@@ -1,0 +1,13 @@
+# Harbor Helm Chart Values Stub
+expose:
+  type: ingress
+  tls:
+    enabled: true
+  ingress:
+    hosts:
+      core: harbor.omnihealth.staging
+
+persistence:
+  enabled: true
+  resource:
+    storage: 100Gi

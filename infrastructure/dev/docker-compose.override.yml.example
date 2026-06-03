@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  # Example: Change PostgreSQL port if you have another one running
+  # postgres:
+  #   ports:
+  #     - "5433:5432"
+
+  # Example: Add Kibana for Elasticsearch visualization
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.1
+    container_name: omnihealth-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch

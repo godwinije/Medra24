@@ -1,0 +1,24 @@
+replicaCount: 2
+
+image:
+  repository: harbor.omnihealth.svc/omnihealth/mpi-service
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 3002
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi
+
+env:
+  - name: DB_HOST
+    value: postgres.omnihealth.svc
+  - name: KAFKA_BOOTSTRAP_SERVERS
+    value: kafka.omnihealth.svc:9092

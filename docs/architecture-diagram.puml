@@ -1,0 +1,117 @@
+@startuml OmniHealth Architecture
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_LANDSCAPE
+
+title OmniHealth - System Architecture (C4 Container Diagram)
+
+Person(provider, "Healthcare Provider", "Doctor, nurse, clinician accessing patient records")
+Person(patient, "Patient", "Individual accessing their own health data")
+Person(analyst, "Analyst", "Population health analyst / researcher")
+Person(admin, "System Admin", "Platform administrator")
+
+System_Boundary(omnihealth, "OmniHealth Platform") {
+  Boundary(api_tier, "API & Gateway Tier") {
+    Container(kong, "API Gateway", "Kong Gateway", "Auth, rate limiting, routing, TLS termination")
+    Container(iam, "IAM Service", "Node.js + PostgreSQL + Redis", "OAuth2/OIDC, RBAC/ABAC, MFA, SSO")
+  }
+
+  Boundary(core_services, "Core Services") {
+    Container(fhir_api, "FHIR API Service", "Node.js + MongoDB + PostgreSQL", "FHIR R4 REST API - CRUD, search, $everything")
+    Container(graphql, "GraphQL Gateway", "Node.js", "Aggregated Patient 360 view, population queries")
+    Container(mpi, "Patient Identity (MPI)", "Node.js + PostgreSQL + Redis", "Record linkage, deduplication, golden record")
+    Container(clinical, "Clinical Data Service", "Node.js + MongoDB + TimescaleDB", "Observations, conditions, medications, encounters")
+    Container(doc_svc, "Document Service", "Node.js + MinIO + Elasticsearch", "C-CDA, PDF, DICOM metadata, full-text search")
+    Container(terminology, "Terminology Service", "Node.js + PostgreSQL", "ICD-10, LOINC, SNOMED-CT, RxNorm, mappings")
+  }
+
+  Boundary(data_pipeline, "Data Ingestion") {
+    Container(ingestion, "Ingestion Pipeline", "Node.js + Kafka", "HL7 v2 MLLP, C-CDA, FHIR Bundle ingestion & FHIR translation")
+  }
+
+  Boundary(intelligence, "Intelligence & Analytics") {
+    Container(pop_health, "Population Health Service", "Node.js + PostgreSQL + ES + TimescaleDB", "Epidemiology, dashboards, alerts, risk stratification")
+    Container(audit, "Audit & Compliance", "Node.js + Kafka + PostgreSQL + MinIO", "HIPAA audit logs, data lineage, retention")
+  }
+
+  Boundary(user_services, "User-Facing Services") {
+    Container(consent, "Consent & Proxy Service", "Node.js + PostgreSQL", "Patient consent directives, data sharing, proxy access")
+    Container(notif, "Notification Service", "Node.js + Redis + SMTP", "WebSocket, email, SMS, webhook alerts")
+  }
+
+  Boundary(messaging, "Messaging & Events") {
+    ContainerDb(kafka, "Apache Kafka", "Event Bus", "clinical.*, identity.*, audit.*, notification.* topics")
+  }
+
+  Boundary(data_store, "Data Stores") {
+    ContainerDb(postgres, "PostgreSQL", "Primary relational store", "Search indexes, structured data, terminology, audit")
+    ContainerDb(mongo, "MongoDB", "FHIR document store", "Polymorphic FHIR resources")
+    ContainerDb(timescale, "TimescaleDB", "Time-series store", "Vitals, labs, IoT device data")
+    ContainerDb(redis, "Redis", "Cache & pub/sub", "Sessions, rate limits, MPI work queue, WebSocket")
+    ContainerDb(minio, "MinIO", "Object storage (S3)", "Clinical documents, DICOM, audit archives")
+    ContainerDb(es, "Elasticsearch", "Search & analytics", "Full-text search, population health analytics")
+  }
+}
+
+' External systems
+System_Ext(facility_emr, "Facility EMR Systems", "HL7 v2, C-CDA, FHIR API")
+System_Ext(nat_eid, "National eID", "SAML 2.0 / OIDC")
+System_Ext(email_sms, "Email/SMS Gateway", "SMTP, Twilio")
+
+' Relationships
+Rel(provider, kong, "HTTPS", "REST/GraphQL API calls")
+Rel(patient, kong, "HTTPS", "Patient portal API calls")
+Rel(analyst, kong, "HTTPS", "Analytics dashboard queries")
+Rel(admin, kong, "HTTPS", "Admin API calls")
+
+Rel(facility_emr, ingestion, "MLLP/HTTPS", "Clinical data feeds")
+Rel(kong, iam, "Validate tokens", "OAuth2/OIDC introspection")
+Rel(kong, fhir_api, "Route /fhir/*", "Reverse proxy")
+Rel(kong, graphql, "Route /graphql", "Reverse proxy")
+Rel(kong, consent, "Route /patient/*", "Reverse proxy")
+Rel(kong, audit, "", "Proxy audit events")
+
+Rel(fhir_api, mpi, "Resolve patient", "Patient identity lookups")
+Rel(fhir_api, mongo, "Read/Write", "FHIR resources")
+Rel(fhir_api, postgres, "Search", "JSONB indexes")
+Rel(fhir_api, kafka, "Publish", "clinical.enriched")
+
+Rel(graphql, fhir_api, "Aggregate", "FHIR resource queries")
+Rel(graphql, clinical, "Aggregate", "Clinical data queries")
+Rel(graphql, doc_svc, "Aggregate", "Document queries")
+
+Rel(mpi, postgres, "Read/Write", "Identity graph")
+Rel(mpi, redis, "Work queue", "Matching tasks")
+Rel(mpi, kafka, "Publish", "identity.patient.*")
+
+Rel(clinical, mongo, "Read/Write", "Clinical observations")
+Rel(clinical, timescale, "Read/Write", "Time-series data")
+Rel(clinical, postgres, "Read/Write", "Search indexes")
+Rel(clinical, kafka, "Consume", "clinical.enriched")
+
+Rel(doc_svc, mongo, "Read/Write", "Document metadata")
+Rel(doc_svc, minio, "Read/Write", "Document content")
+Rel(doc_svc, es, "Index", "Full-text search")
+
+Rel(ingestion, kafka, "Produce", "clinical.raw")
+
+Rel(pop_health, es, "Query", "Population analytics")
+Rel(pop_health, timescale, "Query", "Time-series analytics")
+Rel(pop_health, postgres, "Query", "Aggregated data")
+Rel(pop_health, kafka, "Consume", "clinical.enriched")
+Rel(pop_health, kafka, "Publish", "clinical.alert")
+
+Rel(audit, kafka, "Consume", "audit.* topics")
+Rel(audit, minio, "Archive", "Immutable audit log")
+Rel(audit, postgres, "Write", "Recent audit records")
+
+Rel(consent, postgres, "Read/Write", "Consent records")
+Rel(consent, kafka, "Publish", "consent.changed")
+
+Rel(notif, redis, "Pub/Sub", "Real-time notifications")
+Rel(notif, email_sms, "SMTP/API", "Email/SMS delivery")
+Rel(notif, kafka, "Consume", "notification.send")
+
+Rel(iam, nat_eid, "SAML/OIDC", "Identity federation")
+
+@enduml
