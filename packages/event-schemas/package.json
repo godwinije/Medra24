@@ -1,0 +1,24 @@
+{
+  "name": "@omnihealth/event-schemas",
+  "version": "1.0.0",
+  "description": "Kafka event schemas and TypeScript types for OmniHealth event-driven architecture",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'No tests yet'",
+    "lint": "echo 'No linter configured'"
+  },
+  "dependencies": {
+    "@omnihealth/fhir-types": "1.0.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "files": ["dist", "src"],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}

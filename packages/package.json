@@ -1,0 +1,23 @@
+{
+  "name": "@omnihealth/workspace",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "fhir-types",
+    "event-schemas",
+    "auth-middleware",
+    "audit-client",
+    "id-gen",
+    "config"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "clean": "npm run clean --workspaces",
+    "typecheck": "npm run typecheck --workspaces"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

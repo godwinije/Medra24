@@ -1,0 +1,24 @@
+{
+  "name": "@omnihealth/audit-client",
+  "version": "1.0.0",
+  "description": "Structured audit log emission client for OmniHealth services — produces HIPAA-compliant audit events to Kafka",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'No tests yet'",
+    "lint": "echo 'No linter configured'"
+  },
+  "dependencies": {
+    "@omnihealth/event-schemas": "1.0.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "files": ["dist", "src"],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}

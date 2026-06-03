@@ -1,0 +1,21 @@
+{
+  "name": "@omnihealth/id-gen",
+  "version": "1.0.0",
+  "description": "Deterministic and UUID-based ID generation for OmniHealth FHIR resources, patient identities, and correlation IDs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'No tests yet'",
+    "lint": "echo 'No linter configured'"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "files": ["dist", "src"],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}
