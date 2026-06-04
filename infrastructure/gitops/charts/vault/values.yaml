@@ -1,0 +1,9 @@
+server:
+  ingress:
+    enabled: true
+    hosts:
+      - host: vault.omnihealth.staging
+  ha:
+    enabled: true
+    raft:
+      enabled: true

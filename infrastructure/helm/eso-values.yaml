@@ -1,0 +1,6 @@
+# External Secrets Operator Helm Chart Values Stub
+installCRDs: true
+webhook:
+  port: 9443
+certManager:
+  enabled: true

@@ -1,0 +1,17 @@
+grafana:
+  enabled: true
+  ingress:
+    enabled: true
+    hosts:
+      - grafana.omnihealth.staging
+
+prometheus:
+  enabled: true
+  server:
+    retention: 30d
+
+loki:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 50Gi

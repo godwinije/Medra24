@@ -1,0 +1,20 @@
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: kong.omnihealth.staging
+      paths: ["/"]
+
+env:
+  database: postgres
+  pg_host: postgres.omnihealth.svc
+  pg_user: kong
+  pg_password:
+    valueFrom:
+      secretKeyRef:
+        name: kong-db-secrets
+        key: password
+
+proxy:
+  type: LoadBalancer
